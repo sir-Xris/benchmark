@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+# To test src and std
+run () {
+    trap "echo An error occured while running $1; exit 1" ERR
+    echo -n "Running $1... "
+    INFO=$(env time -f '%E %M' 2>&1 exe/$1 < data/input > data/$1)
+    read TIME MEMORY <<< $INFO
+    # Convert Memory(KB) to Memory(MB)
+    MEMORY=$(echo "scale=2;$MEMORY/1024" | bc 2> /dev/null)
+    echo ${TIME}s ${MEMORY}MB
+    trap ERR
+}
+
+trap 'exit 0' INT
+# Stop running if compile failed
+trap 'exit 1' ERR
+
+# Compile 
+g++ -O3 -Wall -o exe/mk mk.cc
+g++ -O2 -Wall -o exe/std std.cc
+g++ -O2 -Wall -o exe/src src.cc
+
+# Program will not stop until received an ERR or INT
+echo -e "\033[1;31mWarning:\033[0m Press Ctrl+C to interrupt me."
+
+# Wait for one second to take a look of warning
+sleep 1
+
+# only `diff' will cause an ERR will be handled out of `while'
+trap ERR
+
+while [[ $? == 0 ]]; do
+    echo -e '\nProducing data...'
+    exe/mk > data/input
+
+    run std
+    run src
+
+    diff -q data/std data/src
+done
+
+# Only if outputs of 2 program differ
+# will the program come to here
+g++ -g -o exe/src src.cc
