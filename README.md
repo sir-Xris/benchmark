@@ -16,10 +16,14 @@ Then run `./chk`
 
 `mk` makes input data for std and src.
 
-`chk` is the core. It compiles and executes std and src
+`chk` is executor. It compiles and executes std and src, compares their outputs.
+
+Folder `exe` stores compiled program. chk will not delete executable files.
+
+Folder `data` stores input and output datas, you can check output when outputs of `std` and `src` differs.
 
 ## TODO
 
-Well this script can only test C++ program. If anyone wants to test other language {,s}he will have to edit `chk`.
+Well, this script can only test C++ program. If you want to test other language you will have to edit `chk` yourself.
 
-And my origninal version accumulated lots of useful data maker. I will rewrite them one day in the future.(new flag)
+And my origninal version accumulated lots of useful data maker. Maybe I will rewrite them one day in the future.(new flag)
