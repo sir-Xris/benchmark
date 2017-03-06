@@ -20,7 +20,7 @@ g++ -O2 -Wall -o exe/std std.cc
 g++ -O2 -Wall -o exe/src src.cc
 
 # Program will not stop unless received an ERR or INT
-echo -e "\033[1;31mWarning:\033[0m Press Ctrl+C to interrupt me."
+echo -e "\033[1;35mWarning:\033[0m Press Ctrl+C to interrupt me."
 
 # Wait for one second to take a look at warning
 sleep 1
@@ -29,7 +29,7 @@ while [[ $? == 0 ]]; do
     echo -e '\nProducing data...'
 
     # Stop running if caught an ERR
-    trap "echo An error occured while running $1; exit 1" ERR
+    trap "echo -e '\033[1;31mRuntime Error\033[0m'; exit 1" ERR
     exe/mk > data/input
     run std
     run src
