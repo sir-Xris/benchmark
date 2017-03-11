@@ -1,0 +1,7 @@
+# Temporary compiled files
+a.out
+
+# Backup files created by editor
+.*.swp
+.*.swo
+.bak

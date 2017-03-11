@@ -1,23 +1,25 @@
 #!/usr/bin/env bash
 
+trap 'exit 0' INT
+
 # To test src and std
 run () {
     echo -n "Running $1... "
-    INFO=$(env time -f '%E %M' 2>&1 exe/$1 < data/input > data/$1)
+    INFO=$(env time -f '%E %M' 2>&1 bin/$1 < log/input > log/$1)
     read TIME MEMORY <<< $INFO
     # Convert Memory(KB) to Memory(MB)
     MEMORY=$(echo "scale=2;$MEMORY/1024" | bc 2> /dev/null)
     echo ${TIME}s ${MEMORY}MB
 }
 
-trap 'exit 0' INT
-# Stop running if compile failed
-trap 'exit 1' ERR
-
 # Compile, if you want to change language, edit these 3 lines
-g++ -O3 -Wall -o exe/mk mk.cc
-g++ -O2 -Wall -o exe/std std.cc
-g++ -O2 -Wall -o exe/src src.cc
+g++ -O3 -Wall -o bin/mk mk.cc
+if [[ $? != 0 ]]; then exit 1; fi
+g++ -O2 -Wall -o bin/std std.cc
+if [[ $? != 0 ]]; then exit 1; fi
+g++ -O2 -Wall -o bin/src src.cc
+#go build src.go && mv src bin/src
+if [[ $? != 0 ]]; then exit 1; fi
 
 # Program will not stop unless received an ERR or INT
 echo -e "\033[1;35mWarning:\033[0m Press Ctrl+C to interrupt me."
@@ -26,19 +28,19 @@ echo -e "\033[1;35mWarning:\033[0m Press Ctrl+C to interrupt me."
 sleep 1
 
 while [[ $? == 0 ]]; do
-    echo -e '\nProducing data...'
-
     # Stop running if caught an ERR
     trap "echo -e '\033[1;31mRuntime Error\033[0m'; exit 1" ERR
-    exe/mk > data/input
+
+    echo -e '\nProducing data...'
+    bin/mk > log/input
     run std
     run src
 
     # Ignore ERR caused by diff and handle it myself
     trap ERR
-    diff -q data/std data/src
+    diff -q log/std log/src
 done
 
 # Only if outputs of 2 program differ
 # will the program come to here
-g++ -g -o exe/src src.cc
+g++ -g -o bin/src src.cc
