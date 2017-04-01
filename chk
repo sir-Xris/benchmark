@@ -6,6 +6,10 @@ trap 'exit 0' INT
 run () {
     echo -n "Running $1... "
     INFO=$(env time -f '%E %M' 2>&1 bin/$1 < log/input > log/$1)
+    if [[ $? != 0 ]]; then
+        echo -e "\033[1;31mSegment Fault\033[0m";
+        exit 1;
+    fi
     read TIME MEMORY <<< $INFO
     # Convert Memory(KB) to Memory(MB)
     MEMORY=$(echo "scale=2;$MEMORY/1024" | bc 2> /dev/null)
@@ -18,7 +22,6 @@ if [[ $? != 0 ]]; then exit 1; fi
 g++ -O2 -Wall -o bin/std std.cc
 if [[ $? != 0 ]]; then exit 1; fi
 g++ -O2 -Wall -o bin/src src.cc
-#go build src.go && mv src bin/src
 if [[ $? != 0 ]]; then exit 1; fi
 
 # Program will not stop unless received an ERR or INT
@@ -28,19 +31,10 @@ echo -e "\033[1;35mWarning:\033[0m Press Ctrl+C to interrupt me."
 sleep 1
 
 while [[ $? == 0 ]]; do
-    # Stop running if caught an ERR
-    trap "echo -e '\033[1;31mRuntime Error\033[0m'; exit 1" ERR
-
     echo -e '\nProducing data...'
     bin/mk > log/input
     run std
     run src
-
-    # Ignore ERR caused by diff and handle it myself
-    trap ERR
     diff -q log/std log/src
 done
 
-# Only if outputs of 2 program differ
-# will the program come to here
-g++ -g -o bin/src src.cc
