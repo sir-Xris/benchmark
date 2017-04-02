@@ -18,12 +18,12 @@ Then run `./chk`
 
 `chk` is executor. It compiles and executes std and src, compares their outputs.
 
-Folder `exe` stores compiled program. chk will not delete executable files.
+Folder `bin` stores compiled program. chk will not delete executable files.
 
-Folder `data` stores input and output datas, you can check output when outputs of `std` and `src` differs.
+Folder `log` stores input and output data, you can check output when output of `std` and `src` differed.
 
 ## TODO
 
-Well, this script can only test C++ program. If you want to test other language you will have to edit `chk` yourself.
+Well, this script can only test C++ program at present. If you want to test other language you will have to edit `chk` yourself.
 
 And my origninal version accumulated lots of useful data maker. Maybe I will rewrite them one day in the future.(new flag)
