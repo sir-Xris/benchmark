@@ -1,40 +1,50 @@
-#!/usr/bin/env bash
-
 trap 'exit 0' INT
+
+alias echo='/bin/echo'
+readonly WARN="\033[1;33m"
+readonly ERROR="\033[1;31m"
+readonly BOLD="\033[1m"
+readonly NORMAL="\033[0;0m"
 
 # To test src and std
 run () {
     echo -n "Running $1... "
-    INFO=$(env time -f '%E %M' 2>&1 bin/$1 < log/input > log/$1)
-    if [[ $? != 0 ]]; then
-        echo -e "\033[1;31mSegment Fault\033[0m";
-        exit 1;
+    INFO=$(env time --format='%E %M' 2>&1 bin/$1 < log/input > log/$1)
+    if [ $? -ne 0 ]; then
+        echo -e "${ERROR}segmentation fault${NORMAL}"
+        exit $?
     fi
-    read TIME MEMORY <<< $INFO
+    TIME=${INFO% *}
+    MEMORY=${INFO#* }
+
     # Convert Memory(KB) to Memory(MB)
-    MEMORY=$(echo "scale=2;$MEMORY/1024" | bc 2> /dev/null)
-    echo ${TIME}s ${MEMORY}MB
+    MEMORY=$(echo "scale=2;$MEMORY/1024" | bc)
+    echo -e "${BOLD}${TIME}${NORMAL}sec ${BOLD}${MEMORY}${NORMAL}MB"
 }
 
-# Compile, if you want to change language, edit these 3 lines
+SRCFILE=${1:-src.cc}
+SRCOUT=${SRCFILE%.*}
+STDFILE=${2:-std.cc}
+STDOUT=${STDFILE%.*}
+
+# Compile, if you want to change language, edit following lines
 g++ -O3 -Wall -o bin/mk mk.cc
-if [[ $? != 0 ]]; then exit 1; fi
-g++ -O2 -Wall -o bin/std std.cc
-if [[ $? != 0 ]]; then exit 1; fi
-g++ -O2 -Wall -o bin/src src.cc
-if [[ $? != 0 ]]; then exit 1; fi
+if [ $? -ne 0 ]; then exit $?; fi
+g++ -O2 -Wall -o "bin/$STDOUT" "$STDFILE"
+if [ $? -ne 0 ]; then exit $?; fi
+g++ -O2 -Wall -o "bin/$SRCOUT" "$SRCFILE"
+if [ $? -ne 0 ]; then exit $?; fi
 
 # Program will not stop unless received an ERR or INT
-echo -e "\033[1;35mWarning:\033[0m Press Ctrl+C to interrupt me."
-
-# Wait for one second to take a look at warning
+echo -e "${WARN}Warning: Press Ctrl+C to interrupt me.${NORMAL}"
 sleep 1
 
-while [[ $? == 0 ]]; do
-    echo -e '\nProducing data...'
+while [ $? -eq 0 ]; do
+    echo
+    echo 'Producing data...'
     bin/mk > log/input
-    run std
-    run src
-    diff -q log/std log/src
+    run $STDOUT
+    run $SRCOUT
+    diff --brief log/$STDOUT log/$SRCOUT
 done
 
