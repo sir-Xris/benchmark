@@ -6,7 +6,19 @@ It was originally writen for benchmark testing my programs in OI/ACM, but later 
 
 Simply put your standard program into std.cc, unchecked program into src.cc and program that produces data into mk.cc.
 
-Then run `./chk`
+Then simply run `./chk`
+
+If you want to use different standard file like `brute-force.py`, invoke `./chk brute-force.py` instead, and output will be redirected to `log/brute-force`.
+
+But if you want to use different source file, you have to set std at the same time. (I may add `getopt` one day, or rewrite this project with other language...)
+
+The supported file extensions are c, cc, cpp, cxx, go, py, rb. You can add yours in function compile.
+
+So, the pattern is
+
+```bash
+./chk [standard.ext [source.ext]]
+```
 
 ## Files introduction
 
@@ -24,6 +36,6 @@ Folder `log` stores input and output data, you can check output when output of `
 
 ## TODO
 
-Well, this script can only test C++ program at present. If you want to test other language you will have to edit `chk` yourself.
-
 And my origninal version accumulated lots of useful data maker. Maybe I will rewrite them one day in the future.(new flag)
+
+Execute executable files which need executor like `java` binaries are not supported at present, so script files needs sheband at the beginning. Maybe I will add one day.

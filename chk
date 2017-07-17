@@ -14,6 +14,25 @@ SRCOUT=${SRCFILE%.*}
 STDFILE=${2:-std.cc}
 STDOUT=${STDFILE%.*}
 
+# Not support executor like java or python
+# So set shebang in source file, please
+compile () {
+    case ${1##*.} in
+    c)
+        cc -Wall -O2 -o bin/${1%.*} $1 $CFLAGS
+    ;;
+    cc | cpp | cxx)
+        c++ -Wall -O2 -o bin/${1%.*} $1 $CPPFLAGS
+    ;;
+    go)
+        go build $1 && mv ${1%.*} bin/${1%.*}
+    ;;
+    py | rb)
+        install --mode=777 $1 ${1%.*}
+    ;;
+    esac
+}
+
 # To test src and std
 run () {
     echo -n "Running $1... "
@@ -30,11 +49,14 @@ run () {
 }
 
 # Compile, if you want to change language, edit following lines
-g++ -O3 -Wall -o bin/mk mk.cc
+#g++ -O3 -Wall -o bin/mk mk.cc
+compile mk.py
 [[ $? == 0 ]] || exit $?
-g++ -O2 -Wall -o bin/$STDOUT $STDFILE
+#g++ -O2 -Wall -o bin/$STDOUT $STDFILE
+compile $STDFILE
 [[ $? == 0 ]] || exit $?
-g++ -O2 -Wall -o bin/$SRCOUT $SRCFILE
+#g++ -O2 -Wall -o bin/$SRCOUT $SRCFILE
+compile $SRCFILE
 [[ $? == 0 ]] || exit $?
 
 # Program will not stop unless received an ERR or INT
