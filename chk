@@ -50,7 +50,7 @@ run () {
 
 # Compile, if you want to change language, edit following lines
 #g++ -O3 -Wall -o bin/mk mk.cc
-compile mk.py
+compile mk.cc
 [[ $? == 0 ]] || exit $?
 #g++ -O2 -Wall -o bin/$STDOUT $STDFILE
 compile $STDFILE
